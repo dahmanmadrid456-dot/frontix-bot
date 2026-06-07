@@ -1,0 +1,13 @@
+services:
+  - type: worker
+    name: frontix-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        value: 8886451364:AAG3gk_To-0YcR8r8sfUTZDLF0Oi2pYCdCM
+      - key: SOURCE_GROUP_ID
+        value: -5188981465
+      - key: TARGET_CHANNEL_ID
+        value: -1003584115938
