@@ -3,7 +3,6 @@ const https = require('https');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const TARGET_CHANNEL_ID = process.env.TARGET_CHANNEL_ID;
 const WHATSAPP_NUMBER = '213551466301';
-const GROUP_NAME = 'FRONTIX ALGÉRIEN';
 
 async function getCounter() {
   try {
@@ -28,14 +27,31 @@ async function setCounter(num) {
 
 function buildCaption(num) {
   const n = String(num).padStart(2, '0');
-  return `🔢 منتج رقم: ${n}\n📦 النوع: —\n🎯 النيش: —\n━━━━━━━━━━━━━━━━━━━━━━━━\n✅ مدة التوفر: — | أقل كمية: —\n\nلمعرفة سعر المنتج او اي تفاصيل\n📲 تواصل معنا على واتساب: +${WHATSAPP_NUMBER}`;
+  return `🔢 منتج رقم: ${n}
+اختر طريقة الشحن
+✈️ شحن جوي سريع 7-15 يوم ( الأسرع بينهم )
+📦 شحن جوي عادي 20-30 يوم ( مطلوب بكثرة )
+🚢 شحن بحري 3-4 أشهر ( أفضل سعر )
+
+لمعرفة سعر المنتج او اي تفاصيل
+📲 تواصل معنا على واتساب: +${WHATSAPP_NUMBER}
+━━━━━━━━━━━━━━━━━━━━━━━━
+للدخول لقناة FRONTIX VIP التي نشارك فيها منتجات مجربة ومربحة تبيع مباشرة
+اضغط على 👑 FRONTIX VIP
+
+لطلب تصنيع او استيراد اي منتج
+🌐 https://frontixalgerien.com/`;
 }
 
 function buildKeyboard(num) {
   const n = String(num).padStart(2, '0');
-  const msg = encodeURIComponent(`مرحبا، رأيت منتج رقم ${n} في مجموعة ${GROUP_NAME} وأريد معرفة التفاصيل والسعر`);
+  const orderMsg = encodeURIComponent(`مرحبا، رأيت منتج رقم ${n} في مجموعة FRONTIX وأريد معرفة التفاصيل والسعر`);
+  const vipMsg = encodeURIComponent(`أريد الدخول لـ FRONTIX VIP للمنتجات المربحة والمجربة 👑\nكم أدفع؟`);
   return {
-    inline_keyboard: [[{ text: '📲 اضغط للطلب عبر واتساب', url: `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}` }]]
+    inline_keyboard: [
+      [{ text: '📲 اطلب المنتج عبر واتساب', url: `https://wa.me/${WHATSAPP_NUMBER}?text=${orderMsg}` }],
+      [{ text: '👑 FRONTIX VIP — انضم الآن', url: `https://wa.me/${WHATSAPP_NUMBER}?text=${vipMsg}` }]
+    ]
   };
 }
 
