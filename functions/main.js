@@ -3,25 +3,33 @@ const https = require('https');
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const TARGET_CHANNEL_ID = process.env.TARGET_CHANNEL_ID;
 const WHATSAPP_NUMBER = '213551466301';
+const SOURCE_GROUP_ID = '-5188981465'; // ✅ مجموعة المصدر فقط
 
 async function getCounter() {
   try {
-    const res = await fetch(`https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/counter`, {
-      headers: { Authorization: `Bearer ${process.env.NETLIFY_TOKEN}` }
-    });
+    const res = await fetch(
+      `https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/production/counter`,
+      { headers: { Authorization: `Bearer ${process.env.NETLIFY_TOKEN}` } }
+    );
     if (!res.ok) return 0;
-    const data = await res.json();
-    return parseInt(data.value || '0');
+    const text = await res.text();
+    return parseInt(text || '0') || 0;
   } catch { return 0; }
 }
 
 async function setCounter(num) {
   try {
-    await fetch(`https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/counter`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${process.env.NETLIFY_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value: String(num) })
-    });
+    await fetch(
+      `https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/production/counter`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${process.env.NETLIFY_TOKEN}`,
+          'Content-Type': 'text/plain'
+        },
+        body: String(num)
+      }
+    );
   } catch {}
 }
 
@@ -79,6 +87,11 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     const msg = body.message;
     if (!msg) return { statusCode: 200, body: 'ok' };
+
+    // ✅ تجاهل أي رسالة ليست من مجموعة المصدر
+    if (String(msg.chat.id) !== SOURCE_GROUP_ID) {
+      return { statusCode: 200, body: 'ok' };
+    }
 
     const current = await getCounter();
     const num = current + 1;
