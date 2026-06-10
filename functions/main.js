@@ -1,35 +1,32 @@
 const https = require('https');
+const { getStore } = require('@netlify/blobs');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const TARGET_CHANNEL_ID = process.env.TARGET_CHANNEL_ID;
 const WHATSAPP_NUMBER = '213551466301';
-const SOURCE_GROUP_ID = '-5188981465'; // ✅ مجموعة المصدر فقط
+const SOURCE_GROUP_ID = '-5188981465';
 
 async function getCounter() {
   try {
-    const res = await fetch(
-      `https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/production/counter`,
-      { headers: { Authorization: `Bearer ${process.env.NETLIFY_TOKEN}` } }
-    );
-    if (!res.ok) return 0;
-    const text = await res.text();
-    return parseInt(text || '0') || 0;
-  } catch { return 0; }
+    const store = getStore({
+      name: 'frontix',
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_TOKEN
+    });
+    const val = await store.get('counter');
+    if (val === null || val === undefined) return 14;
+    return parseInt(val) || 14;
+  } catch { return 14; }
 }
 
 async function setCounter(num) {
   try {
-    await fetch(
-      `https://api.netlify.com/api/v1/blobs/${process.env.NETLIFY_SITE_ID}/production/counter`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${process.env.NETLIFY_TOKEN}`,
-          'Content-Type': 'text/plain'
-        },
-        body: String(num)
-      }
-    );
+    const store = getStore({
+      name: 'frontix',
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_TOKEN
+    });
+    await store.set('counter', String(num));
   } catch {}
 }
 
@@ -88,7 +85,6 @@ exports.handler = async (event) => {
     const msg = body.message;
     if (!msg) return { statusCode: 200, body: 'ok' };
 
-    // ✅ تجاهل أي رسالة ليست من مجموعة المصدر
     if (String(msg.chat.id) !== SOURCE_GROUP_ID) {
       return { statusCode: 200, body: 'ok' };
     }
