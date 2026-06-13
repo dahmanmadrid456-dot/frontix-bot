@@ -65,8 +65,24 @@ async function publishProduct(p) {
   const reply_markup = { inline_keyboard: [[{ text: '👑 VIP — اطلب الآن عبر واتساب', url: waUrl }]] };
   const imgs = p.images || [];
 
-  if (imgs.length >= 1) {
-    // أرسل أول صورة مع النص (الصور مخزّنة كروابط file_id من تيليغرام)
+  if (imgs.length > 1) {
+    const mediaArr = imgs.map((fid, i) => ({
+      type: 'photo',
+      media: fid,
+      ...(i === 0 ? { caption: text } : {})
+    }));
+    await tg('sendMediaGroup', {
+      chat_id: VIP_CHAT,
+      message_thread_id: parseInt(VIP_THREAD),
+      media: mediaArr
+    });
+    await tg('sendMessage', {
+      chat_id: VIP_CHAT,
+      message_thread_id: parseInt(VIP_THREAD),
+      text: '👇 اطلب الآن:',
+      reply_markup
+    });
+  } else if (imgs.length === 1) {
     await tg('sendPhoto', {
       chat_id: VIP_CHAT,
       message_thread_id: parseInt(VIP_THREAD),
